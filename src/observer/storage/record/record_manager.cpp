@@ -503,6 +503,7 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
 RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
 {
   // your code here
+  int *col_idx = reinterpret_cast<int *>(frame_->data() + page_header_->col_idx_offset);
   for(int i=0;i<chunk.column_num();i++)
   {
     int id_ = chunk.column_ids(i);
