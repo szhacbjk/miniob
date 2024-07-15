@@ -492,7 +492,7 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
   char* data = new char[page_header_->record_real_size];
   for(int i=0;i<page_header_->column_num;i++)
   {
-    char* _data = get_field_data(index,i);
+    char* _data = get_field_data(rid.slot_num,i);
     memcpy(data+i*(get_field_len(i)),_data,get_field_len(i));
   }
   record.set_data(data,page_header_->record_real_size);
@@ -503,7 +503,19 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
 RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
 {
   // your code here
-  exit(-1);
+  for(int i=0;i<chunk.column_num();i++)
+  {
+    int id_ = chunk.column_ids(i);
+    unique_ptr<Column> ptr;
+    char* d ;
+    if(i==0)
+      d= frame_->data() + page_header_->data_offset;
+      else
+        d = frame_->data() + page_header_->data_offset + col_idx[i-1];
+    ptr->append(d,page_header_->record_num);
+    chunk.add_column(ptr,i);
+  }
+  return RC::SUCCESS;
 }
 
 char *PaxRecordPageHandler::get_field_data(SlotNum slot_num, int col_id)
