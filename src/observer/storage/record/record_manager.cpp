@@ -507,14 +507,14 @@ RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
   for(int i=0;i<chunk.column_num();i++)
   {
     int id_ = chunk.column_ids((size_t)i);
-    unique_ptr<Column> ptr;
+    unique_ptr<Column> ptr();
     char* d ;
-    if(i==0)
+    if(id_==0)
       d= frame_->data() + page_header_->data_offset;
       else
-        d = frame_->data() + page_header_->data_offset + col_idx[i-1];
+        d = frame_->data() + page_header_->data_offset + col_idx[id_-1];
     ptr->append(d,page_header_->record_num);
-    chunk.add_column(ptr,i);
+    chunk.add_column(ptr,id_);
   }
   return RC::SUCCESS;
 }
