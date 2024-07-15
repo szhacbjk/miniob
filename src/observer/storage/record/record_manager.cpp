@@ -417,7 +417,36 @@ bool RecordPageHandler::is_full() const { return page_header_->record_num >= pag
 RC PaxRecordPageHandler::insert_record(const char *data, RID *rid)
 {
   // your code here
-  exit(-1);
+    ASSERT(rw_mode_ != ReadWriteMode::READ_ONLY, 
+         "cannot insert record into page while the page is readonly");
+
+  if (page_header_->record_num == page_header_->record_capacity) {
+    LOG_WARN("Page is full, page_num %d:%d.", disk_buffer_pool_->file_desc(), frame_->page_num());
+    return RC::RECORD_NOMEM;
+  }
+
+  // 找到空闲位置
+  Bitmap bitmap(bitmap_, page_header_->record_capacity);
+  int    index = bitmap.next_unsetted_bit(0);
+  bitmap.set_bit(index);
+  page_header_->record_num++;
+
+  RC rc = log_handler_.insert_record(frame_, RID(get_page_num(), index), data);
+  if (OB_FAIL(rc)) {
+    LOG_ERROR("Failed to insert record. page_num %d:%d. rc=%s", disk_buffer_pool_->file_desc(), frame_->page_num(), strrc(rc));
+    // return rc; // ignore errors
+  }
+  for(int i=0;i<page_header_->column_num;i++)
+  {
+    char* _data = get_field_data(index,i);
+    memcpy(_data,data+i*(get_field_len(i)),get_field_len(i));
+  }
+  if(rid)
+  {
+    rid->page_num = get_page_num();
+    rid->slot_num = index;
+  }
+  return RC::SUCCESS;
 }
 
 RC PaxRecordPageHandler::delete_record(const RID *rid)
