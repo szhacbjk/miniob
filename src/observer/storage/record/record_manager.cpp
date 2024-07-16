@@ -322,7 +322,7 @@ RC RowRecordPageHandler::recover_insert_record(const char *data, const RID &rid)
   memcpy(record_data, data, page_header_->record_real_size);
 
   frame_->mark_dirty();
-
+  
   return RC::SUCCESS;
 }
 
@@ -446,6 +446,7 @@ RC PaxRecordPageHandler::insert_record(const char *data, RID *rid)
     rid->page_num = get_page_num();
     rid->slot_num = index;
   }
+  exit(1);
   return RC::SUCCESS;
 }
 
@@ -496,6 +497,7 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
     memcpy(data+i*(get_field_len(i)),_data,get_field_len(i));
   }
   record.set_data(data,page_header_->record_real_size);
+  exit(1);
   return RC::SUCCESS;
 }
 
@@ -516,6 +518,7 @@ RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
     ptr->append(d,page_header_->record_num);
     chunk.add_column(std::move(ptr),id_);
   }
+  exit(1);
   return RC::SUCCESS;
 }
 
