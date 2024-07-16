@@ -496,7 +496,6 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
     memcpy(data+i*(get_field_len(i)),_data,get_field_len(i));
   }
   record.set_data(data,page_header_->record_real_size);
-  exit(1);
   return RC::SUCCESS;
 }
 
