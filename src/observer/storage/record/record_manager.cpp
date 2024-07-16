@@ -500,7 +500,7 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
     offset+=get_field_len(i);
   }
   record.copy_data(data,page_header_->record_real_size);
-  delete data;
+  delete[] data;
   return RC::SUCCESS;
 }
 
