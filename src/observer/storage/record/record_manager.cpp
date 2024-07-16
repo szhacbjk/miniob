@@ -491,14 +491,15 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
   }
   record.set_rid(rid);
   
+  char* data = new char[page_header_->record_real_size];
   int offset = 0;
   for(int i=0;i<page_header_->column_num;i++)
   {
     char* _data = get_field_data(rid.slot_num,i);
-    record.set_field(offset,get_field_len(i),_data);
+    memcpy(data+offset,_data,get_field_len(i));
     offset+=get_field_len(i);
   }
-  
+  record.copy_data(data,page_header_->record_real_size);
   return RC::SUCCESS;
 }
 
