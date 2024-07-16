@@ -436,10 +436,12 @@ RC PaxRecordPageHandler::insert_record(const char *data, RID *rid)
     LOG_ERROR("Failed to insert record. page_num %d:%d. rc=%s", disk_buffer_pool_->file_desc(), frame_->page_num(), strrc(rc));
     // return rc; // ignore errors
   }
+  char* d=data;
   for(int i=0;i<page_header_->column_num;i++)
   {
     char* _data = get_field_data(index,i);
-    memcpy(_data,data+i*(get_field_len(i)),get_field_len(i));
+    memcpy(_data,d,get_field_len(i));
+    d+=get_field_len(i);
   }
   if(rid)
   {
