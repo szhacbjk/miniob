@@ -443,6 +443,7 @@ RC PaxRecordPageHandler::insert_record(const char *data, RID *rid)
     memcpy(_data,data+offset,get_field_len(i));
     offset+=get_field_len(i);
   }
+  frame_->mark_dirty();
   if(rid)
   {
     rid->page_num = get_page_num();
