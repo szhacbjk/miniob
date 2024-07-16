@@ -446,7 +446,6 @@ RC PaxRecordPageHandler::insert_record(const char *data, RID *rid)
     rid->page_num = get_page_num();
     rid->slot_num = index;
   }
-  exit(1);
   return RC::SUCCESS;
 }
 
