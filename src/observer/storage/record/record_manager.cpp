@@ -510,15 +510,21 @@ RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
 {
   // your code here
   int *col_idx = reinterpret_cast<int *>(frame_->data() + page_header_->col_idx_offset);
+  Bitmap bitmap(bitmap_, page_header_->record_capacity);
   for(int i=0;i<chunk.column_num();i++)
   {
     int id_ = chunk.column_ids((size_t)i);
+    int index = 0;
     char* d ;
     if(id_==0)
       d= frame_->data() + page_header_->data_offset;
       else
         d = frame_->data() + page_header_->data_offset + col_idx[id_-1];
-    chunk.column(i).append(d,page_header_->record_num);
+    for(int i=0;i<page_header_->record_num;i++)
+    {
+      index = bitmap.next_setted_bit(index);
+      chunk.column(i).append_one(get_field_data(index,id_));
+    }
   }
   return RC::SUCCESS;
 }
