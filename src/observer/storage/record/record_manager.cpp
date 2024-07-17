@@ -509,7 +509,7 @@ RC PaxRecordPageHandler::get_record(const RID &rid, Record &record)
 RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
 {
   // your code here
-  int *col_idx = reinterpret_cast<int *>(frame_->data() + page_header_->col_idx_offset);
+
   Bitmap bitmap(bitmap_, page_header_->record_capacity);
   for(int i=0;i<chunk.column_num();i++)
   {
