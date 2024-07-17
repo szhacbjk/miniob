@@ -524,6 +524,7 @@ RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
     {
       index = bitmap.next_setted_bit(index);
       chunk.column(i).append_one(get_field_data(index,id_));
+      index++;
     }
   }
   return RC::SUCCESS;
