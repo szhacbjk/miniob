@@ -518,7 +518,7 @@ RC PaxRecordPageHandler::get_chunk(Chunk &chunk)
       d= frame_->data() + page_header_->data_offset;
       else
         d = frame_->data() + page_header_->data_offset + col_idx[id_-1];
-    chunk.column_ptr(i)->append(d,page_header_->record_num);
+    chunk.column(i).append(d,page_header_->record_num);
   }
   return RC::SUCCESS;
 }
