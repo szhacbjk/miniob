@@ -105,6 +105,11 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         EXPLAIN
         STORAGE
         FORMAT
+        SUM
+        COUNT,
+        AVG,
+        MAX,
+        MIN,
         EQ
         LT
         GT
@@ -530,7 +535,22 @@ expression:
     | '*' {
       $$ = new StarExpr();
     }
-    // your code here
+    | SUM expression 
+    {
+      $$=new AggregateExpr(AggregateExpr::Type::SUM,$2);
+    }
+    | COUNT expression 
+    {
+      $$=new AggregateExpr(AggregateExpr::Type::COUNT,$2);
+    }
+    | MAX expression 
+    {
+      $$=new AggregateExpr(AggregateExpr::Type::MAX,$2);
+    }
+    | MIN expression 
+    {
+      $$=new AggregateExpr(AggregateExpr::Type::MIN,$2);
+    }
     ;
 
 rel_attr:
@@ -661,6 +681,10 @@ group_by:
     /* empty */
     {
       $$ = nullptr;
+    }
+    | group_by expression_list
+    {
+      $$ = $2;
     }
     ;
 load_data_stmt:

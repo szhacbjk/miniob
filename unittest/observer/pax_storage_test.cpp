@@ -18,7 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/table/table.h"
 #undef protected
 #undef private
-
+#incldue <iostream>
 #include "storage/buffer/disk_buffer_pool.h"
 #include "storage/record/record_manager.h"
 #include "storage/trx/vacuous_trx.h"
@@ -320,8 +320,10 @@ TEST_P(PaxPageHandlerTestWithParam, PaxPageHandler)
 
   int col1_expected = (int_base + 0 + int_base + record_num - 1) * record_num /2;
   int col1_actual   = 0;
+  std::cout<<"aaaaaaaaaaaaaaaaaaaaaaaaaa"<<std::endl;
   for (int i = 0; i < chunk1.rows(); i++) {
     col1_actual += chunk1.get_value(0, i).get_int();
+    std::cout<<col1_actual<<std::endl;
   }
   for (auto it = delete_slots.begin(); it != delete_slots.end(); ++it) {
     col1_actual += *it + int_base;
