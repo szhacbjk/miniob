@@ -545,15 +545,15 @@ expression:
     }
     | agg_func LBRACE expression RBRACE {
       $$ = create_aggregate_expression($1, $3, sql_string, &@$);
-      free($1);
+      delete $1;
     }
     | agg_func LBRACE RBRACE {
       $$ = create_aggregate_expression($1, nullptr, sql_string, &@$);
-      free($1);
+      delete $1;
     }
     | agg_func LBRACE expression COMMA expression_list RBRACE {
       $$ = create_aggregate_expression($1, $3, sql_string, &@$);
-      free($1);
+      delete $1;
     }
     ;
 
