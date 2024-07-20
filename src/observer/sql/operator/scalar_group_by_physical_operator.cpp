@@ -34,7 +34,6 @@ RC ScalarGroupByPhysicalOperator::open(Trx *trx)
     LOG_INFO("failed to open child operator. rc=%s", strrc(rc));
     return rc;
   }
-
   ExpressionTuple<Expression *> group_value_expression_tuple(value_expressions_);
 
   ValueListTuple group_by_evaluated_tuple;

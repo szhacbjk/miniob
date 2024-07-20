@@ -42,6 +42,7 @@ RC ParseStage::handle_request(SQLStageEvent *sql_event)
     sql_result->set_state_string("");
     return RC::INTERNAL;
   }
+  
 
   if (parsed_sql_result.sql_nodes().size() > 1) {
     LOG_WARN("got multi sql commands but only 1 will be handled");
