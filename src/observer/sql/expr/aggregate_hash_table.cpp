@@ -30,6 +30,8 @@ RC StandardAggregateHashTable::add_chunk(Chunk &groups_chunk, Chunk &aggrs_chunk
   vector<Value> key,value;
   for(size_t r = 0;r<groups_chunk.rows();r++)
   {
+    key.clear();
+    value.clear();
     for(size_t group_id = 0;group_id<groups_chunk.column_num();group_id++)
     {
       key.emplace_back(groups_chunk.get_value(group_id,r));
