@@ -79,9 +79,18 @@ QUOTE            [\'\"]
 
 [\-]?{DIGIT}+                           yylval->number=atoi(yytext); RETURN_TOKEN(NUMBER);
 [\-]?{DIGIT}+{DOT}{DIGIT}+              yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT);
+'[0-9]{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])' yylval->string=strdup(yytext); RETURN_TOKEN(DATE_STR);
+
 
 ";"                                     RETURN_TOKEN(SEMICOLON);
 {DOT}                                   RETURN_TOKEN(DOT);
+SUM                                   RETURN_TOKEN(SUM_STR);
+MIN                                   RETURN_TOKEN(MIN_STR);
+MAX                                   RETURN_TOKEN(MAX_STR);
+AVG                                   RETURN_TOKEN(AVG_STR);
+COUNT                                 RETURN_TOKEN(COUNT_STR);
+LIKE                                    RETURN_TOKEN(LIKE_STR);
+"NOT LIKE"                              RETURN_TOKEN(NOT_LIKE_STR);
 EXIT                                    RETURN_TOKEN(EXIT);
 HELP                                    RETURN_TOKEN(HELP);
 DESC                                    RETURN_TOKEN(DESC);
@@ -110,6 +119,7 @@ ROLLBACK                                RETURN_TOKEN(TRX_ROLLBACK);
 INT                                     RETURN_TOKEN(INT_T);
 CHAR                                    RETURN_TOKEN(STRING_T);
 FLOAT                                   RETURN_TOKEN(FLOAT_T);
+DATE                                    RETURN_TOKEN(DATE_T);
 LOAD                                    RETURN_TOKEN(LOAD);
 DATA                                    RETURN_TOKEN(DATA);
 INFILE                                  RETURN_TOKEN(INFILE);
@@ -118,11 +128,6 @@ GROUP                                   RETURN_TOKEN(GROUP);
 BY                                      RETURN_TOKEN(BY);
 STORAGE                                 RETURN_TOKEN(STORAGE);
 FORMAT                                  RETURN_TOKEN(FORMAT);
-SUM                                     RETURN_TOKEN(SUM);
-COUNT                                   RETURN_TOKEN(COUNT);
-AVG                                     RETURN_TOKEN(AVG);
-MAX                                     RETURN_TOKEN(MAX);
-MIN                                     RETURN_TOKEN(MIN);
 {ID}                                    yylval->string=strdup(yytext); RETURN_TOKEN(ID);
 "("                                     RETURN_TOKEN(LBRACE);
 ")"                                     RETURN_TOKEN(RBRACE);
@@ -135,6 +140,7 @@ MIN                                     RETURN_TOKEN(MIN);
 "<"                                     RETURN_TOKEN(LT);
 ">="                                    RETURN_TOKEN(GE);
 ">"                                     RETURN_TOKEN(GT);
+
 
 "+" |
 "-" |

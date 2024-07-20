@@ -12,12 +12,39 @@
 #include "sql/parser/yacc_sql.hpp"
 #include "sql/parser/lex_sql.h"
 #include "sql/expr/expression.h"
+#include "sql/parser/parse.h"
 
 using namespace std;
+
+extern bool parse_success_;
 
 string token_name(const char *sql_string, YYLTYPE *llocp)
 {
   return string(sql_string + llocp->first_column, llocp->last_column - llocp->first_column + 1);
+}
+
+bool check_date(int y, int m, int d) {
+    static int mon[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    bool leap = (y % 400 == 0 || (y % 100 && y % 4 == 0));
+    if(y <= 0) return false;
+    if(m <= 0 || m > 12) {
+      return false;
+    }
+    return y > 0
+        && (m > 0) && (m <= 12)
+        && (d > 0) && (d <= ((m==2 && leap)? 1 : 0) + mon[m]);
+}
+
+bool init_date_value(Value* value, const char* v) {
+    int y, m, d;
+    sscanf(v, "%d-%d-%d", &y, &m, &d);
+    bool b = check_date(y, m, d);
+    if(!b) {
+      return false;
+    }
+    int tmp = y * 10000 + m * 100 + d;
+    value->set_date(tmp);
+    return true;
 }
 
 int yyerror(YYLTYPE *llocp, const char *sql_string, ParsedSqlResult *sql_result, yyscan_t scanner, const char *msg)
@@ -89,8 +116,16 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         INT_T
         STRING_T
         FLOAT_T
+        DATE_T
         HELP
         EXIT
+        SUM_STR
+        MIN_STR
+        MAX_STR
+        AVG_STR
+        COUNT_STR
+        LIKE_STR
+        NOT_LIKE_STR
         DOT //QUOTE
         INTO
         VALUES
@@ -105,11 +140,6 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         EXPLAIN
         STORAGE
         FORMAT
-        SUM
-        COUNT,
-        AVG,
-        MAX,
-        MIN,
         EQ
         LT
         GT
@@ -135,15 +165,18 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
   char *                                     string;
   int                                        number;
   float                                      floats;
+  char*                                      agg_func;
 }
 
 %token <number> NUMBER
 %token <floats> FLOAT
+%token <string> DATE_STR
 %token <string> ID
 %token <string> SSS
 //非终结符
 
 /** type 定义了各种解析后的结果输出的是什么类型。类型对应了 union 中的定义的成员变量名称 **/
+%type <agg_func>            agg_func
 %type <number>              type
 %type <condition>           condition
 %type <value>               value
@@ -353,6 +386,7 @@ attr_def:
     {
       $$ = new AttrInfoSqlNode;
       $$->type = (AttrType)$2;
+      // printf("test %d\n", $$->type);
       $$->name = $1;
       $$->length = 4;
       free($1);
@@ -365,6 +399,7 @@ type:
     INT_T      { $$ = static_cast<int>(AttrType::INTS); }
     | STRING_T { $$ = static_cast<int>(AttrType::CHARS); }
     | FLOAT_T  { $$ = static_cast<int>(AttrType::FLOATS); }
+    | DATE_T  { $$ = static_cast<int>(AttrType::DATES);}
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
     INSERT INTO ID VALUES LBRACE value value_list RBRACE 
@@ -402,12 +437,22 @@ value:
       $$ = new Value((int)$1);
       @$ = @1;
     }
-    |FLOAT {
+    | FLOAT {
       $$ = new Value((float)$1);
       @$ = @1;
     }
-    |SSS {
-      char *tmp = common::substr($1,1,strlen($1)-2);
+    | DATE_STR {
+      Value* val = new Value();
+      char* tmp = common::substr($1, 1, strlen($1) - 2);
+      if(!init_date_value(val, tmp)) {
+        parse_success_ = false;
+      }
+      $$ = val;
+      free(tmp);
+      free($1);
+    }
+    | SSS {
+      char *tmp = common::substr($1, 1, strlen($1) - 2);
       $$ = new Value(tmp);
       free(tmp);
       free($1);
@@ -449,6 +494,7 @@ update_stmt:      /*  update 语句的语法解析树*/
       }
       free($2);
       free($4);
+      delete($6);
     }
     ;
 select_stmt:        /*  select 语句的语法解析树*/
@@ -501,6 +547,7 @@ expression_list:
       $$->emplace($$->begin(), $1);
     }
     ;
+
 expression:
     expression '+' expression {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::ADD, $1, $3, sql_string, &@$);
@@ -535,9 +582,42 @@ expression:
     | '*' {
       $$ = new StarExpr();
     }
-    | SUM expression 
-    {
-      $$ = create_aggregate_expression("SUM", $2, sql_string, &@$);
+    | agg_func LBRACE expression RBRACE {
+      $$ = create_aggregate_expression($1, $3, sql_string, &@$);
+      free($1);
+    }
+    | agg_func LBRACE RBRACE {
+      $$ = create_aggregate_expression($1, nullptr, sql_string, &@$);
+      parse_success_ = false;
+      free($1);
+    }
+    | agg_func LBRACE expression COMMA expression_list RBRACE {
+      $$ = create_aggregate_expression($1, $3, sql_string, &@$);
+      parse_success_ = false;
+      free($1);
+    }
+    ;
+
+agg_func:
+    SUM_STR { 
+      $$ = new char[4];
+      strcpy($$, "SUM");
+    }
+    | MIN_STR { 
+      $$ = new char[4];
+      strcpy($$, "MIN");
+    }
+    | MAX_STR { 
+      $$ = new char[4];
+      strcpy($$, "MAX");
+    }
+    | AVG_STR { 
+      $$ = new char[4];
+      strcpy($$, "AVG");
+    }
+    | COUNT_STR { 
+      $$ = new char[6];
+      strcpy($$, "COUNT");
     }
     ;
 
@@ -662,6 +742,8 @@ comp_op:
     | LE { $$ = LESS_EQUAL; }
     | GE { $$ = GREAT_EQUAL; }
     | NE { $$ = NOT_EQUAL; }
+    | LIKE_STR { $$ = LIKE; }
+    | NOT_LIKE_STR { $$ = NOT_LIKE; }
     ;
 
 // your code here
