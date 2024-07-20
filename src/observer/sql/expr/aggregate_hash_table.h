@@ -97,7 +97,7 @@ public:
 private:
   /// group by values -> aggregate values
   StandardHashTable                aggr_values_;
-  std::vector<Aggregat3eExpr::Type> aggr_types_;
+  std::vector<AggregateExpr::Type> aggr_types_;
 };
 
 /**
