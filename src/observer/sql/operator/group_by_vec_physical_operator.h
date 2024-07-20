@@ -21,8 +21,11 @@ class GroupByVecPhysicalOperator : public PhysicalOperator
 {
 public:
   GroupByVecPhysicalOperator(
-      std::vector<std::unique_ptr<Expression>> &&group_by_exprs, std::vector<Expression *> &&expressions):group_expressions(std::move(group_by_exprs)), ht_(expressions),scanner(StandardAggregateHashTable::Scanner(&ht_))
+      std::vector<std::unique_ptr<Expression>> &&group_by_exprs, std::vector<Expression *> &&expressions)
       {
+        group_expressions = std::move(group_by_exprs);
+        ht_ = StandardAggregateHashTable(expressions);
+        scanner = StandardAggregateHashTable::Scanner(&ht_);
         aggre_expressions = expressions;
         aggre_value_expressions.reserve(aggre_expressions.size());
         for(auto expr : aggre_expressions)
