@@ -537,7 +537,7 @@ expression:
     }
     | SUM expression 
     {
-      $$ = create_aggregate_expression("SUM", $3, sql_string, &@$);
+      $$ = create_aggregate_expression("SUM", $2, sql_string, &@$);
     }
     ;
 
