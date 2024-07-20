@@ -110,7 +110,7 @@ public:
     while(OB_SUCC(sc.next(chunk))) {
 
     }
-    emited_ = true;
+    emit = true;
     return RC::SUCCESS;
   
 
