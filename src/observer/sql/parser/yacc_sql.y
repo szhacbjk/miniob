@@ -717,8 +717,6 @@ comp_op:
     | LE { $$ = LESS_EQUAL; }
     | GE { $$ = GREAT_EQUAL; }
     | NE { $$ = NOT_EQUAL; }
-    | LIKE_STR { $$ = LIKE; }
-    | NOT_LIKE_STR { $$ = NOT_LIKE; }
     ;
 
 // your code here
