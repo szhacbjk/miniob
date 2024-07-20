@@ -93,7 +93,6 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         INT_T
         STRING_T
         FLOAT_T
-        DATE_T
         HELP
         EXIT
         SUM_STR
@@ -145,7 +144,6 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
 
 %token <number> NUMBER
 %token <floats> FLOAT
-%token <string> DATE_STR
 %token <string> ID
 %token <string> SSS
 //非终结符
@@ -374,7 +372,6 @@ type:
     INT_T      { $$ = static_cast<int>(AttrType::INTS); }
     | STRING_T { $$ = static_cast<int>(AttrType::CHARS); }
     | FLOAT_T  { $$ = static_cast<int>(AttrType::FLOATS); }
-    | DATE_T  { $$ = static_cast<int>(AttrType::DATES);}
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
     INSERT INTO ID VALUES LBRACE value value_list RBRACE 
@@ -415,16 +412,6 @@ value:
     | FLOAT {
       $$ = new Value((float)$1);
       @$ = @1;
-    }
-    | DATE_STR {
-      Value* val = new Value();
-      char* tmp = common::substr($1, 1, strlen($1) - 2);
-      if(!init_date_value(val, tmp)) {
-        parse_success_ = false;
-      }
-      $$ = val;
-      free(tmp);
-      free($1);
     }
     | SSS {
       char *tmp = common::substr($1, 1, strlen($1) - 2);
