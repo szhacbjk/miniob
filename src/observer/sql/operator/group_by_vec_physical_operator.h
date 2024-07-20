@@ -21,7 +21,7 @@ class GroupByVecPhysicalOperator : public PhysicalOperator
 {
 public:
   GroupByVecPhysicalOperator(
-      std::vector<std::unique_ptr<Expression>> &&group_by_exprs, std::vector<Expression *> &&expressions):group_expressions(std::move(group_by_exprs)), ht_(expressions)
+      std::vector<std::unique_ptr<Expression>> &&group_by_exprs, std::vector<Expression *> &&expressions):group_expressions(std::move(group_by_exprs)), ht_(expressions),scanner(StandardAggregateHashTable::Scanner(&ht_))
       {
         aggre_expressions = expressions;
         aggre_value_expressions.reserve(aggre_expressions.size());
@@ -32,7 +32,7 @@ public:
           ASSERT(child != nullptr, "aggregation expression must have a child expression");
           aggre_value_expressions.emplace_back(child);
         } 
-        scanner = StandardAggregateHashTable::Scanner(&ht_);
+        
       };
 
   virtual ~GroupByVecPhysicalOperator() = default;
