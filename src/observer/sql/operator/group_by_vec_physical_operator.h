@@ -106,7 +106,7 @@ public:
     }
     
     scanner.open_scan();
-    while(OB_SUCC(scanner.next(chunk))) {
+    while(OB_SUCC(scanner->next(chunk))) {
 
     }
     emit = true;
