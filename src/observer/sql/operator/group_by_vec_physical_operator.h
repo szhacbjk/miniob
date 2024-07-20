@@ -87,18 +87,18 @@ public:
     return rc;
   }
   RC next(Chunk &chunk) override { 
-     if(emited_) {
+     if(emit) {
       return RC::RECORD_EOF;
     }
     
     int col_id = 0;
-    for(auto& group_expr : group_by_exprs_) {
+    for(auto& group_expr : group_expressions) {
       Column col;
       group_expr->get_column(chunk_, col);
       chunk.add_column(make_unique<Column>(col.attr_type(), col.attr_len()), col_id);
       col_id ++;
     }
-    for(auto& aggrs_expr : value_expressions_) {
+    for(auto& aggrs_expr : aggre_value_expressions) {
       Column col;
       aggrs_expr->get_column(chunk_, col);
       chunk.add_column(make_unique<Column>(col.attr_type(), col.attr_len()), col_id);
