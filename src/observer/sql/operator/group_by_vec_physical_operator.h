@@ -105,7 +105,7 @@ public:
       col_id ++;
     }
     
-    scanner.open_scan();
+    scanner->open_scan();
     while(OB_SUCC(scanner->next(chunk))) {
 
     }
