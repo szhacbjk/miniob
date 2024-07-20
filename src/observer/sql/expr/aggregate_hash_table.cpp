@@ -41,7 +41,7 @@ RC StandardAggregateHashTable::add_chunk(Chunk &groups_chunk, Chunk &aggrs_chunk
 
     if(aggr_values_.find(key)!=aggr_values_.end())
     {
-      vector<Value> old = aggr_values_[key];
+      vector<Value>& old = aggr_values_.find(key)->second;
       for(int i=0;i<old.size();i++)
       {
         if(old[i].attr_type()==AttrType::INTS)
@@ -53,7 +53,6 @@ RC StandardAggregateHashTable::add_chunk(Chunk &groups_chunk, Chunk &aggrs_chunk
           old[i].set_float(old[i].get_float()+value[i].get_float());
         }
       }
-      aggr_values_[key]=old;
     }
     else
       aggr_values_[key]=value;
