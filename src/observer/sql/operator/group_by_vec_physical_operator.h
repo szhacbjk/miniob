@@ -32,7 +32,7 @@ public:
           ASSERT(child != nullptr, "aggregation expression must have a child expression");
           aggre_value_expressions.emplace_back(child);
         } 
-        scanner = StandardAggregateHashTable::Scanner(ht_);
+        scanner = StandardAggregateHashTable::Scanner(&ht_);
       };
 
   virtual ~GroupByVecPhysicalOperator() = default;
@@ -48,7 +48,7 @@ public:
       LOG_INFO("failed to open child operator. rc=%s", strrc(rc));
       return rc;
     }
-    while(rc = child.next(chunk_))
+    while(OB_SUCC(rc =child.next(chunk_)))
     {
       int col_id = 0;
       Chunk group_chunk,aggr_chunk;
@@ -99,7 +99,7 @@ public:
       output_chunk.add_column(make_unique<Column>(val_expr->value_type(),val_expr->value_length()),col_id);
       col_id++;
     }
-    rc = scanner.next(output_chunk);
+    RC rc = scanner.next(output_chunk);
     chunk.reference(output_chunk);
     emit = true;
     return rc;
