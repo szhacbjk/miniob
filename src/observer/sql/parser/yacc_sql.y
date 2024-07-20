@@ -556,7 +556,8 @@ expression:
 
 agg_func:
     SUM_STR { 
-      $$ = "SUM".c_str();
+      $$ = new char[4];
+      strcpy($$, "SUM");
     }
     | MIN_STR { 
       $$ = new char[4];
