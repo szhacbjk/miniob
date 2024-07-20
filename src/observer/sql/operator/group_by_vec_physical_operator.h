@@ -87,26 +87,33 @@ public:
     return rc;
   }
   RC next(Chunk &chunk) override { 
-    if(emit)
-    return RC::RECORD_EOF;
-    output_chunk.reset_data();
-    int col_id=0;
-    for(auto& group_expr: group_expressions)
-    {
-      output_chunk.add_column(make_unique<Column>(group_expr->value_type(),group_expr->value_length()),col_id);
-      col_id++;
+     if(emited_) {
+      return RC::RECORD_EOF;
     }
-    for(auto& val_expr:aggre_value_expressions)
-    {
-      output_chunk.add_column(make_unique<Column>(val_expr->value_type(),val_expr->value_length()),col_id);
-      col_id++;
+    
+    int col_id = 0;
+    for(auto& group_expr : group_by_exprs_) {
+      Column col;
+      group_expr->get_column(chunk_, col);
+      chunk.add_column(make_unique<Column>(col.attr_type(), col.attr_len()), col_id);
+      col_id ++;
     }
-    RC rc;
-    scanner->open_scan();
-    while(OB_SUCC(rc=scanner->next(output_chunk))){};
-    chunk.reference(output_chunk);
-    emit = true;
-    return rc;
+    for(auto& aggrs_expr : value_expressions_) {
+      Column col;
+      aggrs_expr->get_column(chunk_, col);
+      chunk.add_column(make_unique<Column>(col.attr_type(), col.attr_len()), col_id);
+      col_id ++;
+    }
+    
+    StandardAggregateHashTable::Scanner sc(&ht_);
+    sc.open_scan();
+    while(OB_SUCC(sc.next(chunk))) {
+
+    }
+    emited_ = true;
+    return RC::SUCCESS;
+  
+
     }
   RC close() override {
     RC rc=children_[0]->close();
