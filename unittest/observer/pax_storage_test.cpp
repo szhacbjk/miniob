@@ -18,7 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/table/table.h"
 #undef protected
 #undef private
-#incldue <iostream>
+#include <iostream>
 #include "storage/buffer/disk_buffer_pool.h"
 #include "storage/record/record_manager.h"
 #include "storage/trx/vacuous_trx.h"
