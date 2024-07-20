@@ -89,8 +89,6 @@ MIN                                   RETURN_TOKEN(MIN_STR);
 MAX                                   RETURN_TOKEN(MAX_STR);
 AVG                                   RETURN_TOKEN(AVG_STR);
 COUNT                                 RETURN_TOKEN(COUNT_STR);
-LIKE                                    RETURN_TOKEN(LIKE_STR);
-"NOT LIKE"                              RETURN_TOKEN(NOT_LIKE_STR);
 EXIT                                    RETURN_TOKEN(EXIT);
 HELP                                    RETURN_TOKEN(HELP);
 DESC                                    RETURN_TOKEN(DESC);

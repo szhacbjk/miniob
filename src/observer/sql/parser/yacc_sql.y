@@ -23,29 +23,6 @@ string token_name(const char *sql_string, YYLTYPE *llocp)
   return string(sql_string + llocp->first_column, llocp->last_column - llocp->first_column + 1);
 }
 
-bool check_date(int y, int m, int d) {
-    static int mon[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    bool leap = (y % 400 == 0 || (y % 100 && y % 4 == 0));
-    if(y <= 0) return false;
-    if(m <= 0 || m > 12) {
-      return false;
-    }
-    return y > 0
-        && (m > 0) && (m <= 12)
-        && (d > 0) && (d <= ((m==2 && leap)? 1 : 0) + mon[m]);
-}
-
-bool init_date_value(Value* value, const char* v) {
-    int y, m, d;
-    sscanf(v, "%d-%d-%d", &y, &m, &d);
-    bool b = check_date(y, m, d);
-    if(!b) {
-      return false;
-    }
-    int tmp = y * 10000 + m * 100 + d;
-    value->set_date(tmp);
-    return true;
-}
 
 int yyerror(YYLTYPE *llocp, const char *sql_string, ParsedSqlResult *sql_result, yyscan_t scanner, const char *msg)
 {
@@ -124,8 +101,6 @@ UnboundAggregateExpr *create_aggregate_expression(const char *aggregate_name,
         MAX_STR
         AVG_STR
         COUNT_STR
-        LIKE_STR
-        NOT_LIKE_STR
         DOT //QUOTE
         INTO
         VALUES
