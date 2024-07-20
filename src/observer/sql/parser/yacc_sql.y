@@ -537,19 +537,7 @@ expression:
     }
     | SUM expression 
     {
-      $$=new AggregateExpr(AggregateExpr::Type::SUM,$2);
-    }
-    | COUNT expression 
-    {
-      $$=new AggregateExpr(AggregateExpr::Type::COUNT,$2);
-    }
-    | MAX expression 
-    {
-      $$=new AggregateExpr(AggregateExpr::Type::MAX,$2);
-    }
-    | MIN expression 
-    {
-      $$=new AggregateExpr(AggregateExpr::Type::MIN,$2);
+      $$ = create_aggregate_expression("SUM", $3, sql_string, &@$);
     }
     ;
 
