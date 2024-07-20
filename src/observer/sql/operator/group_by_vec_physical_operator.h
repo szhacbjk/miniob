@@ -101,7 +101,8 @@ public:
       output_chunk.add_column(make_unique<Column>(val_expr->value_type(),val_expr->value_length()),col_id);
       col_id++;
     }
-    while(OB_SUCC(scanner->next(output_chunk))){};
+    RC rc;
+    while(OB_SUCC(rc=scanner->next(output_chunk))){};
     chunk.reference(output_chunk);
     emit = true;
     return rc;
