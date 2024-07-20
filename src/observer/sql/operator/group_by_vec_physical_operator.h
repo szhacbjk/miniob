@@ -113,7 +113,7 @@ public:
    }
 
 private:
-  vector<Expression *> aggre_expressions;
+  vector<std::unique_ptr<Expression>> aggre_expressions;
   vector<Expression *> aggre_value_expressions;
   vector<Expression *> group_expressions;
   StandardAggregateHashTable ht_;
