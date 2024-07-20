@@ -102,6 +102,7 @@ public:
       col_id++;
     }
     RC rc;
+    scanner->open_scan();
     while(OB_SUCC(rc=scanner->next(output_chunk))){};
     chunk.reference(output_chunk);
     emit = true;

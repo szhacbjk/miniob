@@ -83,7 +83,7 @@ RC AggregateVecPhysicalOperator::open(Trx *trx)
       }
     }
   }
-
+  flag = false;
   if (rc == RC::RECORD_EOF) {
     rc = RC::SUCCESS;
   }
@@ -102,6 +102,8 @@ void AggregateVecPhysicalOperator::update_aggregate_state(void *state, const Col
 RC AggregateVecPhysicalOperator::next(Chunk &chunk)
 {
   // your code here
+  if(flag)
+  return RC::RECORD_EOF;
   chunk.reset_data();
   output_chunk_.reset_data();
   for (size_t aggr_idx = 0; aggr_idx < aggregate_expressions_.size(); aggr_idx++)
@@ -123,6 +125,7 @@ RC AggregateVecPhysicalOperator::next(Chunk &chunk)
     } 
   }
   chunk.reference(output_chunk_);
+  flag = true;
   return RC::SUCCESS;
 }
 
@@ -130,5 +133,6 @@ RC AggregateVecPhysicalOperator::close()
 {
   children_[0]->close();
   LOG_INFO("close group by operator");
+  flag=false;
   return RC::SUCCESS;
 }
