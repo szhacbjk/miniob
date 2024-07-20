@@ -11,11 +11,54 @@ See the Mulan PSL v2 for more details. */
 #include "sql/expr/aggregate_hash_table.h"
 
 // ----------------------------------StandardAggregateHashTable------------------
-
+/*
+a b c group by a b sum(c)
+1 0 3 2
+2 5 8
+3 6 9
+1 2 7
+1 0 6 5
+*/
+/*
+1 0 9 7
+2 5 8
+3 6 9
+1 2 7
+*/
 RC StandardAggregateHashTable::add_chunk(Chunk &groups_chunk, Chunk &aggrs_chunk)
 {
-  // your code here
-  exit(-1);
+  vector<Value> key,value;
+  for(size_t r = 0;r<groups_chunk.rows();r++)
+  {
+    for(size_t group_id = 0;group_id<groups_chunk.column_num();group_id++)
+    {
+      key.emplace_back(groups_chunk.get_value(group_id,r));
+    }
+    for(size_t aggr_val_id = 0;aggr_val_id<aggrs_chunk.column_num();aggr_val_id++)
+    {
+      value.emplace_back(aggrs_chunk.get_value(aggr_val_id,r));
+    }
+
+    if(aggr_values_.find(key)!=aggr_values_.end())
+    {
+      vector<Value> old = aggr_values_[key];
+      for(int i=0;i<old.size();i++)
+      {
+        if(old[i].attr_type()==AttrType::INTS)
+        {
+          old[i].set_int(old[i].get_int()+value[i].get_int());
+        }
+        else if(old[i].attr_type()==AttrType::FLOATS)
+        {
+          old[i].set_float(old[i].get_float()+value[i].get_float());
+        }
+      }
+      aggr_values_[key]=old;
+    }
+    else
+      aggr_values_[key]=value;
+  }
+  return RC::SUCCESS;
 }
 
 void StandardAggregateHashTable::Scanner::open_scan()

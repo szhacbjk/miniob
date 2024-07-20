@@ -98,10 +98,32 @@ void AggregateVecPhysicalOperator::update_aggregate_state(void *state, const Col
   state_ptr->update(data, column.count());
 }
 
+
 RC AggregateVecPhysicalOperator::next(Chunk &chunk)
 {
   // your code here
-  exit(-1);
+  chunk.reset_data();
+  output_chunk_.reset_data();
+  for (size_t aggr_idx = 0; aggr_idx < aggregate_expressions_.size(); aggr_idx++)
+  {
+    auto &expr = aggregate_expressions_[aggr_idx];
+    ASSERT(expr->type() == ExprType::AGGREGATION, "expected an aggregation expression");
+    auto *aggregate_expr = static_cast<AggregateExpr *>(expr);
+    if (aggregate_expr->aggregate_type() == AggregateExpr::Type::SUM)
+    {
+      if(aggregate_expr->value_type()==AttrType::INTS)
+      {
+         append_to_column<SumState<int>,int>(aggr_values_.at(aggr_idx),output_chunk_.column(aggr_idx));
+         
+      }
+      if(aggregate_expr->value_type()==AttrType::FLOATS)
+      {
+         append_to_column<SumState<float>,float>(aggr_values_.at(aggr_idx),output_chunk_.column(aggr_idx));
+      }
+    } 
+  }
+  chunk.reference(output_chunk_);
+  return RC::SUCCESS;
 }
 
 RC AggregateVecPhysicalOperator::close()
