@@ -105,9 +105,8 @@ public:
       col_id ++;
     }
     
-    StandardAggregateHashTable::Scanner sc(&ht_);
-    sc.open_scan();
-    while(OB_SUCC(sc.next(chunk))) {
+    scanner.open_scan();
+    while(OB_SUCC(scanner.next(chunk))) {
 
     }
     emit = true;
