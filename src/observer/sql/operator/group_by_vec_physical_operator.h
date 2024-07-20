@@ -24,8 +24,6 @@ public:
       std::vector<std::unique_ptr<Expression>> &&group_by_exprs, std::vector<Expression *> &&expressions)
       {
         group_expressions = std::move(group_by_exprs);
-        ht_ = StandardAggregateHashTable(expressions);
-        scanner = StandardAggregateHashTable::Scanner(&ht_);
         aggre_expressions = expressions;
         aggre_value_expressions.reserve(aggre_expressions.size());
         for(auto expr : aggre_expressions)
@@ -35,7 +33,8 @@ public:
           ASSERT(child != nullptr, "aggregation expression must have a child expression");
           aggre_value_expressions.emplace_back(child);
         } 
-        
+        ht_ = std::make_unique<StandardAggregateHashTable>(expressions);
+        scanner = std::make_unique<StandardAggregateHashTable::Scanner>(ht_.get());
       };
 
   virtual ~GroupByVecPhysicalOperator() = default;
@@ -72,14 +71,14 @@ public:
         aggr_chunk.column(col_id).append(col.data(),col.count());
         col_id++;
       }
-      rc=ht_.add_chunk(group_chunk,aggr_chunk);
+      rc=ht_->add_chunk(group_chunk,aggr_chunk);
       if (OB_FAIL(rc)) {
         LOG_INFO("failed to add chunks. rc=%s", strrc(rc));
         return rc;
       }
       
     }
-    scanner.open_scan();
+    scanner->open_scan();
     if(rc==RC::RECORD_EOF)
     {
       rc=RC::SUCCESS;
@@ -102,7 +101,7 @@ public:
       output_chunk.add_column(make_unique<Column>(val_expr->value_type(),val_expr->value_length()),col_id);
       col_id++;
     }
-    RC rc = scanner.next(output_chunk);
+    RC rc = scanner->next(output_chunk);
     chunk.reference(output_chunk);
     emit = true;
     return rc;
@@ -116,9 +115,9 @@ private:
   vector<Expression*> aggre_expressions;
   vector<Expression *> aggre_value_expressions;
   vector<std::unique_ptr<Expression>> group_expressions;
-  StandardAggregateHashTable ht_;
   Chunk chunk_,output_chunk;
   bool emit = false;
-  StandardAggregateHashTable::Scanner scanner;
+  std::unique_ptr<StandardAggregateHashTable> ht_;
+  std::unique_ptr<StandardAggregateHashTable::Scanner> scanner;
 
 };
